@@ -1,60 +1,61 @@
-﻿
-using System;
-using System.Reflection.Metadata;
-
+﻿using System;
 namespace Painter
 {
-    public class Ball
+	public class PaintCan
     {
         Texture2D colorRed, colorGreen, colorBlue;
         Vector2 position, origin, velocity;
-        Color color;
+        Color color, targetColor;
         bool shooting;
+        float minSpeed;
 
-        public Ball(ContentManager Content)
+        public PaintCan(ContentManager Content, float positionOffset, Color target)
         {
-            colorRed = Content.Load<Texture2D>("spr_ball_red");
-            colorGreen = Content.Load<Texture2D>("spr_ball_green");
-            colorBlue = Content.Load<Texture2D>("spr_ball_blue");
+            colorRed = Content.Load<Texture2D>("spr_can_red");
+            colorGreen = Content.Load<Texture2D>("spr_can_green");
+            colorBlue = Content.Load<Texture2D>("spr_can_blue");
 
             origin = new Vector2(colorRed.Width / 2, colorRed.Height / 2);
+            targetColor = target;
+            position = new Vector2(positionOffset, -origin.Y);
+            minSpeed = 30;
 
             Reset();
         }
 
         public void Reset()
         {
-            position = new Vector2(65, 390);
+            position.Y = -origin.Y;
             Color = Color.Blue;
             velocity = Vector2.Zero;
             shooting = false;
         }
 
-        public void HandleInput(InputHelper inputHelper) {
-            if (inputHelper.MouseLeftButtonPressed() && !shooting)
-            {
-                shooting = true;
-                velocity = (inputHelper.MousePosition - Game1.GameWorld.Cannon.Position) * 1.2f;
-            }
-        }
-
         public void Update(GameTime gameTime)
         {
-            if (shooting)
+            float dt = (float) gameTime.ElapsedGameTime.TotalSeconds;
+            minSpeed += 0.01f * dt;
+
+            if (velocity != Vector2.Zero)
             {
-                float dt = (float)gameTime.ElapsedGameTime.TotalSeconds;
-                velocity.Y += 400.0f * dt;
                 position += velocity * dt;
+
+                if (Game1.GameWorld.IsOutsideWorld(position - origin))
+                {
+                    Reset();
+                }
+
+                if (BoundingBox.Intersects(Game1.GameWorld.Ball.BoundingBox))
+                {
+                    Color = Game1.GameWorld.Ball.Color;
+                    Game1.GameWorld.Ball.Reset();
+                }
             } else
             {
-                Color = Game1.GameWorld.Cannon.Color;
-                position = Game1.GameWorld.Cannon.BallPosition;
+                velocity = CalculateRandomVelocity();
+                Color = (Color)CalculateRandomColor();
             }
 
-            if (Game1.GameWorld.IsOutsideWorld(position))
-            {
-                Reset();
-            }
         }
 
         public void Draw(GameTime gameTime, SpriteBatch spriteBatch)
@@ -71,7 +72,22 @@ namespace Painter
             // draw that sprite
             spriteBatch.Draw(currentSprite, position, null, Color.White,
                 0f, origin, 1.0f, SpriteEffects.None, 0);
+        }
 
+        Vector2 CalculateRandomVelocity()
+        {
+            return new Vector2(0.0f, (float)Game1.Random.NextDouble() * 30 + minSpeed);
+        }
+
+        Color? CalculateRandomColor()
+        {
+            return Game1.Random.Next(3) switch
+            {
+                0 => Color.Red,
+                1 => Color.Green,
+                2 => Color.Blue,
+                _ => null
+            };
         }
 
         public Color Color
@@ -102,3 +118,4 @@ namespace Painter
         }
     }
 }
+

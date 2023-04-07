@@ -23,6 +23,7 @@ public class Game1 : Game
         graphics = new GraphicsDeviceManager(this);
         IsMouseVisible = true;
         inputHelper = new InputHelper();
+        Random = new Random();  
     }
 
     protected override void Initialize()
@@ -36,6 +37,8 @@ public class Game1 : Game
     {
         spriteBatch = new SpriteBatch(GraphicsDevice);
         gameWorld = new GameWorld(Content);
+
+        ScreenSize = new Vector2(GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height);
     }
 
     protected override void Update(GameTime gameTime)
@@ -49,6 +52,18 @@ public class Game1 : Game
     {
         GraphicsDevice.Clear(Color.White);
         gameWorld.Draw(gameTime, spriteBatch);
+    }
+
+    public static Vector2 ScreenSize
+    {
+        get;
+        private set;
+    }
+
+    public static Random Random
+    {
+        get;
+        private set;
     }
 }
 
