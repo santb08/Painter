@@ -9,13 +9,17 @@ namespace Painter
     {
         Cannon cannon;
         Ball ball;
-        Texture2D background;
+        Texture2D background, gameOver, life;
         PaintCan can1, can2, can3;
+        int lifes = 3;
 
         public GameWorld(ContentManager Content)
         {
             cannon = new Cannon(Content);
             background = Content.Load<Texture2D>("spr_background");
+            gameOver = Content.Load<Texture2D>("spr_gameover");
+            life = Content.Load<Texture2D>("spr_lives");
+
             ball = new Ball(Content);
 
             can1 = new PaintCan(Content, 480.0f, Color.Red);
@@ -25,11 +29,35 @@ namespace Painter
 
         public void HandleInput(InputHelper inputHelper)
         {
-            cannon.HandleInput(inputHelper);
-            ball.HandleInput(inputHelper);
+            if (!IsGameOver)
+            {
+                cannon.HandleInput(inputHelper);
+                ball.HandleInput(inputHelper);
+
+                return;
+            }
+
+            if (inputHelper.KeyPressed(Keys.Space)) Reset();
+        }
+
+        void Reset()
+        {
+            lifes = 3;
+            cannon.Reset();
+            can1.Reset();
+            can2.Reset();
+            can3.Reset();
+            can1.ResetMinSpeed();
+            can2.ResetMinSpeed();
+            can3.ResetMinSpeed();
         }
 
         public void Update(GameTime gametime) {
+            if (IsGameOver)
+            {
+                return;
+            }
+
             ball.Update(gametime);
             can1.Update(gametime);
             can2.Update(gametime);
@@ -39,13 +67,37 @@ namespace Painter
         public void Draw(GameTime gameTime, SpriteBatch spriteBatch)
         {
             spriteBatch.Begin();
+
             spriteBatch.Draw(background, Vector2.Zero, Color.White);
             ball.Draw(gameTime, spriteBatch);
             cannon.Draw(gameTime, spriteBatch);
             can1.Draw(gameTime, spriteBatch);
             can2.Draw(gameTime, spriteBatch);
             can3.Draw(gameTime, spriteBatch);
+
+            for (int i = 0; i < lifes; i++)
+            {
+                spriteBatch.Draw(life, new Vector2(i * life.Width + 15, 20), Color.White);
+            }
+
+            if (IsGameOver)
+            {
+                spriteBatch.Draw(
+                    gameOver,
+                    new Vector2(
+                        Game1.ScreenSize.X - gameOver.Width,
+                        Game1.ScreenSize.Y - gameOver.Height
+                    ) / 2,
+                    Color.White
+                );
+            }
+
             spriteBatch.End();
+        }
+
+        public void LoseLife()
+        {
+            lifes--;
         }
 
         public bool IsOutsideWorld(Vector2 position)
@@ -61,6 +113,11 @@ namespace Painter
         public Ball Ball
         {
             get { return ball; }
+        }
+
+        bool IsGameOver
+        {
+            get { return lifes <= 0; }
         }
     }
 }

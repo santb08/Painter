@@ -4,53 +4,35 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace Painter
 {
-    public class Cannon
+    public class Cannon : ThreeColorGameObject
     {
-        Texture2D cannonBarrel, colorRed, colorBlue, colorGreen;
-        Vector2 barrelPosition, barrelOrigin, colorOrigin;
-        Color currentColor;
-        float angle;
+        Texture2D cannonBarrel;
+        Vector2 barrelOrigin;
+        float barrelRotation;
 
         public Cannon(ContentManager Content)
+            : base(Content, "spr_cannon_red", "spr_cannon_green", "spr_cannon_blue")
         {
             cannonBarrel = Content.Load<Texture2D>("spr_cannon_barrel");
-            colorRed = Content.Load<Texture2D>("spr_cannon_red");
-            colorBlue = Content.Load<Texture2D>("spr_cannon_blue");
-            colorGreen = Content.Load<Texture2D>("spr_cannon_green");
-
+            position = new Vector2(72, 405);
             barrelOrigin = new Vector2(cannonBarrel.Width, cannonBarrel.Height) / 2;
-            colorOrigin = new Vector2(colorRed.Width / 2, colorRed.Height / 2);
-            barrelPosition = new Vector2(72, 405);
-
-            currentColor = Color.Blue;
-
         }
 
-        public void Reset()
+        public override void Reset()
         {
-            currentColor = Color.Blue;
-            angle = 0;
+            base.Reset();
+            barrelRotation = 0;
         }
 
-        public void Draw(GameTime gameTime, SpriteBatch _spriteBatch)
+        public override void Draw(GameTime gameTime, SpriteBatch spriteBatch)
         {
-            _spriteBatch.Draw(cannonBarrel, barrelPosition, null, Color.White, angle, barrelOrigin, 1f, SpriteEffects.None, 0);
-
-            // determine the sprite based on the current color
-            Texture2D currentSprite;
-            if (currentColor == Color.Red)
-                currentSprite = colorRed;
-            else if (currentColor == Color.Green)
-                currentSprite = colorGreen;
-            else
-                currentSprite = colorBlue;
-
-            // draw that sprite
-            _spriteBatch.Draw(currentSprite, barrelPosition, null, Color.White, 0f, colorOrigin, 1.0f, SpriteEffects.None, 0);
+            spriteBatch.Draw(cannonBarrel, position, null, Color.White, barrelRotation, barrelOrigin, 1f, SpriteEffects.None, 0);
+            base.Draw(gameTime, spriteBatch);
         }
 
-        public void HandleInput(InputHelper inputHelper)
+        public override void HandleInput(InputHelper inputHelper)
         {
+            // change the color when the player presses R/G/B
             if (inputHelper.KeyPressed(Keys.R))
             {
                 Color = Color.Red;
@@ -64,41 +46,18 @@ namespace Painter
                 Color = Color.Blue;
             }
 
-            double opposite = inputHelper.MousePosition.Y - barrelPosition.Y;
-            double adjacent = inputHelper.MousePosition.X - barrelPosition.X;
-            Angle = (float)Math.Atan2(opposite, adjacent);
-        }
-
-        float Angle
-        {
-            get { return angle; }
-            set { angle = value; }
-        }
-
-        public Color Color
-        {
-            get { return currentColor; }
-            private set
-            {
-                if (value != Color.Red && value != Color.Blue && value != Color.Green)
-                    return;
-                currentColor = value;
-
-            }
-        }
-
-        public Vector2 Position
-        {
-            get { return barrelPosition; }
+            double opposite = inputHelper.MousePosition.Y - Position.Y;
+            double adjacent = inputHelper.MousePosition.X - Position.X;
+            barrelRotation = (float)Math.Atan2(opposite, adjacent);
         }
 
         public Vector2 BallPosition
         {
             get
             {
-                float opposite = (float)Math.Sin(angle) * cannonBarrel.Width * 0.75f;
-                float adjacent = (float)Math.Cos(angle) * cannonBarrel.Width * 0.75f;
-                return barrelPosition + new Vector2(adjacent, opposite);
+                float opposite = (float)Math.Sin(barrelRotation) * cannonBarrel.Width * 0.75f;
+                float adjacent = (float)Math.Cos(barrelRotation) * cannonBarrel.Width * 0.75f;
+                return Position + new Vector2(adjacent, opposite);
             }
         }
     }
