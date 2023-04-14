@@ -6,6 +6,7 @@ namespace Painter
         Color color, targetColor;
         bool shooting;
         float minSpeed;
+        SoundEffect soundEffect;
 
         public PaintCan(ContentManager Content, float positionOffset, Color target)
             : base(Content, "spr_can_red", "spr_can_green", "spr_can_blue")
@@ -13,6 +14,7 @@ namespace Painter
             targetColor = target;
             position = new Vector2(positionOffset, -origin.Y);
             minSpeed = 30;
+            soundEffect = Content.Load<SoundEffect>("snd_collect_points");
         }
 
         public override void Reset()
@@ -30,6 +32,7 @@ namespace Painter
 
         public override void Update(GameTime gameTime)
         {
+            rotation = (float)Math.Sin(Position.Y / 50.0) * 0.05f;
             float dt = (float) gameTime.ElapsedGameTime.TotalSeconds;
             minSpeed += 0.01f * dt;
 
@@ -40,6 +43,11 @@ namespace Painter
                 if (Game1.GameWorld.IsOutsideWorld(position - origin))
                 {
                     if (Color != targetColor) Game1.GameWorld.LoseLife();
+                    else
+                    {
+                        soundEffect.Play();
+                        Game1.GameWorld.Score += 10;
+                    }
                     Reset();
                 }
 

@@ -54,7 +54,7 @@ namespace Painter
 
             // draw that sprite
             spriteBatch.Draw(currentSprite, position, null, Color.White,
-                0f, origin, 1.0f, SpriteEffects.None, 0);
+                rotation, origin, 1.0f, SpriteEffects.None, 0);
         }
 
         public Vector2 Position

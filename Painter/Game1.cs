@@ -23,7 +23,10 @@ public class Game1 : Game
         graphics = new GraphicsDeviceManager(this);
         IsMouseVisible = true;
         inputHelper = new InputHelper();
-        Random = new Random();  
+        Random = new Random();
+
+        MediaPlayer.IsRepeating = true;
+        MediaPlayer.Play(Content.Load<Song>("snd_music"));
     }
 
     protected override void Initialize()

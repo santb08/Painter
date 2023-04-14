@@ -8,9 +8,12 @@ namespace Painter
     {
         Color color;
         bool shooting;
+        SoundEffect soundEffect;
 
         public Ball(ContentManager Content)
-            : base(Content, "spr_ball_red", "spr_ball_green", "spr_ball_blue") { }
+            : base(Content, "spr_ball_red", "spr_ball_green", "spr_ball_blue") {
+            soundEffect = Content.Load<SoundEffect>("snd_shoot_paint");
+        }
 
         public override void Reset()
         {
@@ -25,6 +28,7 @@ namespace Painter
             {
                 shooting = true;
                 velocity = (inputHelper.MousePosition - Game1.GameWorld.Cannon.Position) * 1.2f;
+                soundEffect.Play();
             }
         }
 
